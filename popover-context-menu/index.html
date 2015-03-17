@@ -1,0 +1,217 @@
+
+ <!DOCTYPE html>
+<html>
+    <head>
+        <title>ngPopoverMenu</title>
+
+        <script src="../scripts/jquery/dist/jquery.js"></script>
+        <script src="../scripts/angular/angular.js"></script>
+
+        <script src="../scripts/angular-strap/angular-strap.js"></script>
+        <script src="../scripts/angular-strap/angular-strap.tpl.js"></script>
+        <script src="../scripts/angular-sanitize/angular-sanitize.js"></script>
+
+        <link href="../scripts/bootstrap/dist/css/bootstrap.css" rel="stylesheet" />
+        <link href="../scripts/font-awesome/css/font-awesome.min.css" rel="stylesheet" />
+
+ <style>
+        
+            .popover-menu {
+                  top: 100%;
+                  left: 0;
+                  z-index: 1000;
+                  float: left;
+                  min-width: 160px;
+                  padding: 5px 0;
+                  margin: 2px 0 0;
+                  font-size: 14px;
+                  text-align: left;
+                  list-style: none;
+                  background-color: #fff;
+                  border:none;
+            }
+
+            .popover-menu li {
+                text-decoration: none;
+                padding-left: 10%;
+                cursor: context-menu;
+            }
+            
+            .popover-menu > li:hover:not(.readonly),
+            .popover-menu > li:focus:not(.readonly) {
+              color: #262626;
+              text-decoration: none;
+              background-color: #f5f5f5;
+            }
+
+            .popover-menu .divider {
+              height: 1px;
+              margin: 9px 0;
+              overflow: hidden;
+              background-color: #e5e5e5;
+            }
+                        
+            .popover-content {
+                padding: 0;
+            }
+
+            .menuarrow {
+                color: #000000;
+                padding-top: 2%;
+                padding-right: 10%;
+            }
+            
+            .menuarrow:hover {
+                color: #000000;
+            }
+            
+            .popover-title {
+                background-color: #FFFFFF; 
+                cursor: context-menu;
+                margin-left: 2%;
+                font-weight: 800;
+            }
+
+            .popover-title:hover {
+                color: #262626;
+                background-color: #f9f9f9; 
+            }
+
+            .titlearrow {
+                color: #000000;
+                padding-top: 5%;
+                padding-left: 5%;
+            }
+            
+            .readonly {
+               color: #999999;
+            }
+            
+        </style>
+   
+       <script>
+        
+       var myApp = angular.module('myApp', ['mgcrea.ngStrap', 'ngSanitize']);
+
+        myApp.config(function($popoverProvider) {
+            angular.extend($popoverProvider.defaults, { html: true });
+        });
+
+        myApp.controller('DataController', ['$scope', '$http', function($scope, $http) {
+
+            $scope.init = function() {
+
+                $http.get('menus.json').then(function(res) {
+                    $scope.menus = res.data.menus;
+                });
+            }
+         }]);
+
+        myApp.directive('lcContextMenuPopup', ['bsPopoverDirective', '$timeout', function (bsPopoverDirective, $timeout) {
+
+            return angular.extend({}, bsPopoverDirective[0], {
+
+                scope: {
+                  json: '@'
+                },
+                controller: function ($scope) {
+
+                    // To have json data available the initialization happens after 50ms
+                    $timeout(function () {
+
+                        // variable initialization
+                        $scope.menuQ = [];
+                        $scope.rootMenu = true;
+
+                        // Load the initial menus
+                        $scope.data = angular.fromJson($scope.json);
+
+                        // push the rootmenu to title & menu queue.
+                        $scope.menuQ.push([$scope.title, $scope.data]);
+                    }, 50);
+
+                    /** 
+                     * Event triggered when user clicks on the menu item
+                     */
+                    $scope.onMenuItemClick = function(item, index) {
+
+                        if (item.menus.length == 0) {
+                            // TODO: launch the url in new tab
+                        } else {
+
+                            // Pushes the current title & menu to menu queue
+                            // the content will be popped traverse to previous menu.
+                            var menus = item.menus;
+
+                            // MenuQ item, index [0] - title
+                            // MenuQ item, index [1] - menus array
+                            $scope.menuQ.push([$scope.title, menus]);
+
+                            // Assigns the menu content and title, that automatically binds to scope.
+                            $scope.data = menus;
+                            $scope.title = item.name;
+                            $scope.rootMenu = false;
+                        }
+                    };
+
+                    /**
+                     * Title click event
+                     */
+                    $scope.onTitleClick = function() {
+
+                        if ($scope.menuQ.length == 1) return;
+
+                        // Assigns the previous tile fetched from menu queue.
+                        $scope.title = $scope.menuQ[$scope.menuQ.length - 1][0];
+
+                        // Removes the item from menuQ when traverse to previouse menu.
+                        $scope.menuQ.pop();
+
+                        // Assigns the menu content and title, that automatically binds to scope.
+                        var qsize = $scope.menuQ.length;
+                        $scope.data  = $scope.menuQ[qsize - 1][1];
+                        $scope.rootMenu = (qsize == 1);
+                    };
+                    
+                    /**
+                     * Listen for popover hide and clears the menuQ
+                     */
+                    $scope.$on('tooltip.hide', function() {
+
+                        // Resets the title and data
+                        $scope.title = $scope.menuQ[0][0];
+                        $scope.data  = $scope.menuQ[0][1];
+
+                        // Queues only the root menu.
+                        $scope.menuQ    = $scope.menuQ.slice(0, 1);
+                        
+                        //Set as root menu
+                        $scope.rootMenu = true;
+                    });
+                }
+            });
+        }]);
+            
+       </script>
+       
+    </head>
+
+    <body ng-app="myApp" >
+        <div ng-controller="DataController" ng-init="init()">
+            this is test menu
+
+            <button 
+                class="btn btn-lg btn-primary" 
+                data-placement="bottom" 
+                data-auto-close="1" 
+                data-title="3rdParty tools"
+                data-template="ngPopoverMenu.html"
+                data-json="{{menus}}"
+                lc-context-menu-popup>
+                Show 3rdParty tools
+            </button>
+        
+    </div>
+  </body>
+
+</html>

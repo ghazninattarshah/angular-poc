@@ -1,0 +1,19 @@
+<div class="popover {{placement}}" ng-class="{ in: isOpen(), fade: animation() }" tabindex="-1">
+  <div class="arrow"></div>
+
+  <div class="popover-inner">
+      <i class="fa fa-caret-left pull-left titlearrow" ng-if="rootMenu === false"></i>
+      <h3 class="popover-title" ng-bind-html="title" ng-show="title" ng-click="onTitleClick(this)"></h3>
+      
+      <div class="popover-content">
+          <ul class="popover-menu">
+              <li ng-class="{ 'divider' : !(item.divider === undefined), 'readonly': (item.readonly === true), 'menuitem' : (item.menus.length > 0 && item.readonly === undefined) }"
+                  ng-repeat="item in data" 
+                  ng-click="onMenuItemClick(item, $index)">
+                  {{item.name}}
+                  <i class="fa fa-caret-right pull-right menuarrow" ng-if="item.menus.length > 0"></i>
+              </li>
+          </ul>
+      </div>
+  </div>
+</div>

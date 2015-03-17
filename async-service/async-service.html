@@ -1,0 +1,69 @@
+ <!DOCTYPE html>
+<html>
+    <head>
+        <title>load Async</title>
+
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/angular.js/1.3.13/angular.min.js"></script>
+        <script src="https://code.jquery.com/jquery-2.1.3.min.js"></script>
+        
+        <script>
+        
+            var app = angular.module('testAync', []);
+            
+            app.directive('randomName', function () {
+
+                return {
+                    restrict: 'E',
+                    template: "<button ng-click=\"loadUsers()\">Show users </button>" +
+                              "<ul ng-repeat=\"user in users\">" +
+                              " <li> {{user.fname}} </li>" +
+                              "</ul>",
+                    controller: function ($scope, $controller) {
+
+                        $scope.users = [];
+                        $scope.loadUsers = function() {
+                            $scope.users = $scope.getResults('UserNameController', 'getUsers', []);
+                        };
+                        
+                        $scope.getResults = function(controllerName, functionName, args) {
+
+                            var newController = $controller(controllerName, {$scope: $scope});
+                            var fn = $scope[functionName];
+                            return fn.apply(this, args || []);
+                        };
+                        
+                        $scope.$on('usersUpdated', function(event, result) {
+                            $scope.users = result;
+                        }); 
+                    }
+                }
+            });
+
+            app.controller('UserNameController', function($scope, $http) {
+
+                $scope.getUsers = function() {
+
+                    var config = {
+                        params: {
+                            'rows': 10,
+                            'fname': '{firstName}',
+                            'lname': '{lastName}',
+                            'tel': '{phone|format}',
+                            'callback': "JSON_CALLBACK"
+                        }
+                    }
+                    $http.jsonp("http://www.filltext.com", config, {}).success(function (data) {
+                        //return data; // does not work as the response are in async
+                        //$scope.users = data; // this one works but you are directly accessing directive variable in child scope, not recommended.
+                        $scope.$emit('usersUpdated', data);
+                    });
+                };
+            });
+            
+        </script>
+    </head>
+    
+   <body ng-app="testAync">
+        <random-name></random-name>
+   </body>
+</html>

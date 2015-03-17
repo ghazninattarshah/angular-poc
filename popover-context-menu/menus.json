@@ -1,0 +1,62 @@
+{ 
+  "menus" : [
+   {
+      "name" : "List 1",
+      "link" : "",
+      "icon" : "list1.png",
+      "menus" : [
+        { 
+          "name" : "Sub List 1_1",
+          "link" : "http://sublist1_1/",
+          "icon" : "sublist1_1.png",
+          "menus" : []
+        }
+      ]
+    },
+    {
+      "name" : "List 2",
+      "link" : "http://list2/",
+      "icon" : "list2.png",
+      "menus" : []
+    },
+    {
+        "divider" : true
+    },
+    {
+        "name" : "Lookups..",
+        "readonly" : true
+    },
+    {
+      "name" : "List 3",
+      "link" : "http://list3/",
+      "icon" : "list3.png",
+      "menus" : []
+    },
+    {
+      "name" : "List 4",
+      "link" : "",
+      "icon" : "list4.png",
+      "menus" : [
+        { 
+          "name" : "Sub List 4_1",
+          "link" : "",
+          "icon" : "sublist4_1.png",
+          "menus" : [
+            { 
+              "name" : "Sub List 4_1_1",
+              "link" : "http://sublist4_1_1/",
+              "icon" : "sublist4_1_1.png",
+              "menus" : []
+            },
+            { 
+              "name" : "Sub List 4_1_2",
+              "link" : "http://sublist4_1_2/",
+              "icon" : "sublist4_1_2.png",
+              "menus" : []
+            }
+          ]
+        }
+      ]
+    }
+ ]
+}
